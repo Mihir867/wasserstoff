@@ -1,26 +1,41 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 
-const Product = () => {
+interface Vendor {
+  name: string;
+  price: number;
+}
+
+interface ProductData {
+  id: number;
+  name: string;
+  description: string;
+  images: string[];
+  status: "In Stock" | "Low Stock" | "Out of Stock";
+  vendors: Vendor[];
+}
+
+const Product: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedVendor, setSelectedVendor] = useState(0);
+  const [product, setProduct] = useState<ProductData | null>(null); // Use null as initial state
 
-  const product = {
-    images: [
-      "https://via.placeholder.com/600x400",
-      "https://via.placeholder.com/600x400",
-      "https://via.placeholder.com/600x400",
-    ],
-    status: "In Stock", // Options: 'In Stock', 'Low Stock', 'Out of Stock'
-    vendors: [
-      { name: "Vendor 1", price: 50 },
-      { name: "Vendor 2", price: 55 },
-      { name: "Vendor 3", price: 52 },
-    ],
-  };
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await fetch('http://localhost:5000/api/products');
+      const data = await response.json();
+      // Assuming you want the first product for display
+      if (data.length > 0) {
+        setProduct(data[0]); // Set the first product
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuantity(parseInt(e.target.value));
+    const value = Math.max(1, parseInt(e.target.value)); // Ensure quantity is at least 1
+    setQuantity(value);
   };
 
   const handleVendorChange = (index: number) => {
@@ -36,6 +51,10 @@ const Product = () => {
     slidesToScroll: 1,
   };
 
+  if (!product) {
+    return <div>Loading...</div>; // Show loading state while fetching
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       {/* Product Images Carousel */}
@@ -46,7 +65,7 @@ const Product = () => {
               <img
                 src={image}
                 alt={`Product image ${index + 1}`}
-                className="w-full h-64 object-cover"
+                className="w-full h-96 object-cover"
               />
             </div>
           ))}
@@ -61,8 +80,8 @@ const Product = () => {
             product.status === "In Stock"
               ? "text-green-500"
               : product.status === "Low Stock"
-                ? "text-yellow-500"
-                : "text-red-500"
+              ? "text-yellow-500"
+              : "text-red-500"
           }`}
         >
           {product.status}

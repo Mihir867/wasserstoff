@@ -1,56 +1,39 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import ProductDetails from "./components/ProductDetails";
 import CustomerReviews from "./components/CustomerReviews";
 import RelatedProductsCarousel from "./components/RelatedProductsCarousel";
 import ImageGallery from "./components/ImageGallery";
+import { AppDispatch } from '../src/redux/store'; // Import AppDispatch type
+import { useDispatch } from "react-redux";
+import { fetchProductDetails } from "./redux/slices/productSlice";
+import { fetchReviews } from "./redux/slices/reviewSlice";
+import { fetchRelatedProducts } from "./redux/slices/relatedProductSlice";
 
 function App() {
+
+  const productId = 1;
   
+  const dispatch: AppDispatch = useDispatch(); 
+  useEffect(() => {
+    const fetchData = async () => {
+      await dispatch(fetchProductDetails(productId));
+      await dispatch(fetchReviews(productId));
+      await dispatch(fetchRelatedProducts(productId));
+    };
 
-  const reviews = [
-    {
-      id: 1,
-      rating: 5,
-      comment: "Working with Jone was a game-changer for our project! Her keen eye for detail and creative approach to product design elevated our concept beyond our expectations. We look forward to collaborating on future projects.",
-      userImage: "path/to/image.jpg",  
-      date:"today"
-    },
-    {
-      id: 2,
-      rating: 5,
-      comment: "Working with Jone was a game-changer for our project! Her keen eye for detail and creative approach to product design elevated our concept beyond our expectations. We look forward to collaborating on future projects.",
-      userImage: "path/to/image.jpg",  
-      date:"today",
-    },{
-      id: 3,
-      rating: 5,
-      comment: "lol",
-      userImage: "path/to/image.jpg",  
-      date:"today",
-    },{
-      id: 4,
-      rating: 5,
-      comment: "here",
-      userImage: "path/to/image.jpg",  
-      date:"today",
-    },{
-      id: 5,
-      rating: 5,
-      comment: "Working with Jone was a game-changer for our project! Her keen eye for detail and creative approach to product design elevated our concept beyond our expectations. We look forward to collaborating on future projects.",
-      userImage: "path/to/image.jpg",  
-      date:"today",
-    },
-  ];
-
+    fetchData();
+  }, [dispatch, productId]);
   return (
     <>
+    
       <div className="max-w-6xl mx-auto p-4">
         <ProductDetails />
-        <CustomerReviews reviews={reviews} />
+        <CustomerReviews productId={productId} />
         <RelatedProductsCarousel />
         <ImageGallery />
       </div>
+    
     </>
   );
 }
